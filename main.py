@@ -1,6 +1,8 @@
 import pygame
 import random
 
+pygame.init()
+
 # game keys
 KEY_BACKSPACE = 32
 KEY_W = 119
