@@ -8,13 +8,15 @@ KEY_S = 115
 KEY_UP = 273
 KEY_DOWN = 274
 
-SIZE_WINDOW_X = 800
+
+TEST_WINDOW_Y = 440
+SIZE_WINDOW_X = 900
 SIZE_WINDOW_Y = 400
 CENTER_WINDOW_X = SIZE_WINDOW_X / 2
 CENTER_WINDOW_Y = SIZE_WINDOW_Y / 2
-BALL_SIZE_X = 50
-BALL_SIZE_Y = 50
-BALL_SPEED = 0.5
+BALL_SIZE_X = 40
+BALL_SIZE_Y = 40
+BALL_SPEED = 0.85
 PLUS_BALL_SPEED = 0.05
 
 # stick sizes
@@ -32,10 +34,11 @@ RIGHT_BOTTOM = 2
 LEFT_BOTTOM = 3
 LEFT_TOP = 4
 
-window = pygame.display.set_mode((SIZE_WINDOW_X, SIZE_WINDOW_Y))
-pygame.display.set_caption('Hello')
+window = pygame.display.set_mode((SIZE_WINDOW_X, TEST_WINDOW_Y))
+pygame.display.set_caption('Ping Pong')
 screen = pygame.Surface((SIZE_WINDOW_X, SIZE_WINDOW_Y))
-check_point = pygame.Surface((5, 5))
+line = pygame.Surface((SIZE_WINDOW_X, 20))
+line.fill((255, 255, 0))
 
 pygame.font.init()
 font_tap_play = pygame.font.SysFont('arial', 50)
@@ -90,11 +93,19 @@ class Game:
             elif ball.direction == LEFT_TOP:
                 ball.direction = LEFT_BOTTOM
         # right wall
-        # elif ball.pos_bottom_right_x > SIZE_WINDOW_X:
-        #     if ball.direction == RIGHT_BOTTOM:
-        #         ball.direction = LEFT_BOTTOM
-        #     elif ball.direction == RIGHT_TOP:
-        #         ball.direction = LEFT_TOP
+        elif (ball.pos_top_right_x >= stick_right.pos_top_left_x and
+              (ball.pos_top_right_y >= stick_right.pos_top_left_y and
+               ball.pos_top_right_y <= stick_right.pos_bottom_right_y or
+               ball.pos_bottom_left_y >= stick_right.pos_top_right_y and
+               ball.pos_bottom_left_y <= stick_right.pos_bottom_right_y or
+               ball.pos_y >= stick_right.pos_top_right_y and
+               ball.pos_y <= stick_right.pos_bottom_right_y) and
+              ball.pos_top_right_x <= stick_right.pos_x
+        ):
+            if ball.direction == RIGHT_BOTTOM:
+                ball.direction = LEFT_BOTTOM
+            elif ball.direction == RIGHT_TOP:
+                ball.direction = LEFT_TOP
         # bottom wall
         elif ball.pos_bottom_left_y > SIZE_WINDOW_Y:
             if ball.direction == RIGHT_BOTTOM:
@@ -102,12 +113,19 @@ class Game:
             elif ball.direction == LEFT_BOTTOM:
                 ball.direction = LEFT_TOP
         # left wall
-        # elif ball.pos_top_left_x < 0:
-        #     if ball.direction == LEFT_BOTTOM:
-        #         ball.direction = RIGHT_BOTTOM
-        #     elif ball.direction == LEFT_TOP:
-        #         ball.direction = RIGHT_TOP
-
+        elif (ball.pos_top_left_x <= stick_left.pos_top_right_x and
+              (ball.pos_top_left_y >= stick_left.pos_top_right_y and
+              ball.pos_top_left_y <= stick_left.pos_bottom_right_y or
+              ball.pos_bottom_left_y >= stick_left.pos_top_right_y and
+              ball.pos_bottom_left_y <= stick_left.pos_bottom_right_y or
+              ball.pos_y >= stick_left.pos_top_right_y and
+              ball.pos_y <= stick_left.pos_bottom_right_y) and
+            ball.pos_top_left_x >= stick_left.pos_x
+        ):
+            if ball.direction == LEFT_BOTTOM:
+                ball.direction = RIGHT_BOTTOM
+            elif ball.direction == LEFT_TOP:
+                ball.direction = RIGHT_TOP
 
 class ControllerBall:
     def __init__(self, pos_x, pos_y, size_x, size_y, filename_img):
@@ -115,7 +133,6 @@ class ControllerBall:
         self.speed = BALL_SPEED
 
         self.direction = random.randint(1, 4)
-
         self.default_pos_x = pos_x
         self.default_pos_y = pos_y
 
@@ -193,7 +210,6 @@ class ControllerStick:
         self.pos_bottom_left_y = self.pos_top_left_y + SIZE_STICK_Y
         self.pos_bottom_right_x = self.pos_bottom_left_x + SIZE_STICK_X
         self.pos_bottom_right_y = self.pos_bottom_left_y
-
 
         # status LEFT_STICK or RIGHT_STICK
         self.status = status
@@ -279,8 +295,7 @@ while done:
             if e.key == KEY_DOWN:
                 stick_right.bottom = False
 
-    screen.fill((38, 37, 165))
-    check_point.fill((127, 255, 0))
+    screen.fill((0, 180, 0))
 
     pygame.draw.rect(screen, (180, 180, 180), (CENTER_WINDOW_X - 4, 0, 8, SIZE_WINDOW_Y))
 
@@ -301,25 +316,10 @@ while done:
         ball.direction = random.randint(1, 4)
         ball.render()
 
-        stick_left.render()
-        # print('stick_left ' + str(stick_left.pos_x))
-        stick_right.render()
-        # print('stick_right ' + str(stick_right.pos_x))
-
-        screen.blit(check_point, (stick_left.pos_top_left_x, stick_left.pos_top_left_y))
-        screen.blit(check_point, (stick_left.pos_top_right_x - 5, stick_left.pos_top_right_y))
-        screen.blit(check_point, (stick_left.pos_bottom_left_x, stick_left.pos_bottom_left_y - 5))
-        screen.blit(check_point, (stick_left.pos_bottom_right_x - 5, stick_left.pos_bottom_right_y - 5))
-        screen.blit(check_point, (stick_left.pos_x - 2.5, stick_left.pos_y - 2.5))
-
-        screen.blit(check_point, (stick_right.pos_top_left_x, stick_right.pos_top_left_y))
-        screen.blit(check_point, (stick_right.pos_top_right_x - 5, stick_right.pos_top_right_y))
-        screen.blit(check_point, (stick_right.pos_bottom_left_x, stick_right.pos_bottom_left_y - 5))
-        screen.blit(check_point, (stick_right.pos_bottom_right_x - 5, stick_right.pos_bottom_right_y - 5))
-        screen.blit(check_point, (stick_right.pos_x - 2.5, stick_right.pos_y - 2.5))
-
         screen.blit(textTapPlay, (CENTER_WINDOW_X - 100, CENTER_WINDOW_Y - 80))
-        window.blit(screen, (0, 0))
+        window.blit(screen, (0, 20))
+        window.blit(line, (0, 0))
+        window.blit(line, (0, 20 + SIZE_WINDOW_Y))
         pygame.display.flip()
     else:
         text_score_left = font_score.render(str(game.left_score), 1, (127, 255, 0))
@@ -333,11 +333,10 @@ while done:
         game.score_controller()
         game.collision_controller()
 
-        screen.blit(check_point, (ball.pos_top_left_x, ball.pos_top_left_y))
-        screen.blit(check_point, (ball.pos_top_right_x - 5, ball.pos_top_right_y))
-        screen.blit(check_point, (ball.pos_bottom_left_x, ball.pos_bottom_left_y - 5))
-        screen.blit(check_point, (ball.pos_bottom_right_x - 5, ball.pos_bottom_right_y - 5))
-        screen.blit(check_point, (ball.pos_x - 2.5, ball.pos_y - 2.5))
+        stick_left.render()
+        stick_right.render()
 
-        window.blit(screen, (0, 0))
+        window.blit(screen, (0, 20))
+        window.blit(line, (0, 0))
+        window.blit(line, (0, 20 + SIZE_WINDOW_Y))
         pygame.display.flip()
